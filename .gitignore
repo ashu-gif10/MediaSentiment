@@ -1,0 +1,61 @@
+# ==========================================
+# MediaSentiment — Git Exclusion Rules
+# ==========================================
+
+# 1. Environment Variables & Secrets (CRITICAL)
+.env
+.env.*
+*.env
+client/.env
+client/.env.*
+server/.env
+server/.env.*
+
+# Explicitly preserve example configuration templates
+!.env.example
+!client/.env.example
+!server/.env.example
+
+# 2. Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+.pnp
+.pnp.js
+
+# 3. Production Builds & Compiled Outputs
+dist/
+client/dist/
+dist-ssr/
+build/
+
+# 4. Python Bytecode, Caches & Virtual Environments
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# 5. Logs & Diagnostic Traces
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 6. Vite Temporary Artifacts
+vite.config.js.timestamp-*
+client/vite.config.js.timestamp-*
+
+# 7. Local Output Files (Generated PDFs, Scratch Test Runs)
+*.pdf
+
+# 8. Editor & Operating System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
