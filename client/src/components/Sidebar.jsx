@@ -7,13 +7,15 @@ import {
   Settings, 
   X,
   PieChart,
-  ShieldAlert
+  ShieldAlert,
+  ShoppingBag
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose, activeTab, setActiveTab }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'new-analysis', label: 'New Analysis', icon: Youtube },
+    { id: 'new-analysis', label: 'YouTube Analysis', icon: Youtube },
+    { id: 'product-reviews', label: 'Product Reviews', icon: ShoppingBag },
     { id: 'results', label: 'Analysis Results', icon: PieChart },
     { id: 'history', label: 'Analysis History', icon: History },
     { id: 'settings', label: 'Settings', icon: Settings },

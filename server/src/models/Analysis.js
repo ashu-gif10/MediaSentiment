@@ -29,8 +29,16 @@ const analysisSchema = new mongoose.Schema(
     },
     engine: {
       type: String,
-      enum: ['python', 'youtube_api'],
+      enum: ['python', 'youtube_api', 'csv_product_review', 'flipkart_review'],
       default: 'python',
+    },
+    isDemo: {
+      type: Boolean,
+      default: false,
+    },
+    product: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
     hasComments: {
       type: Boolean,

@@ -1,5 +1,6 @@
 import express from 'express';
 import { analyzeYouTubeComments } from '../controllers/analysisController.js';
+import { analyzeProductReviews, validateFlipkartProductUrl, fetchFlipkartReviews } from '../controllers/reviewController.js';
 import { extractYouTubeVideoId } from '../utils/youtubeValidator.js';
 
 const router = express.Router();
@@ -12,6 +13,16 @@ router.post('/python', (req, res, next) => {
   req.body.engine = 'python';
   return analyzeYouTubeComments(req, res, next);
 });
+
+// POST /api/analyze/reviews & /api/analyze/product-reviews - CSV Product Review Analysis
+router.post('/reviews', analyzeProductReviews);
+router.post('/product-reviews', analyzeProductReviews);
+
+// POST /api/analyze/flipkart/validate - Validate Flipkart product link
+router.post('/flipkart/validate', validateFlipkartProductUrl);
+
+// POST /api/analyze/flipkart/fetch-reviews - Fetch live reviews via flipkart-scraping & Scrape.do
+router.post('/flipkart/fetch-reviews', fetchFlipkartReviews);
 
 // POST /api/analyze/validate-url - Quick validation endpoint
 router.post('/validate-url', (req, res) => {

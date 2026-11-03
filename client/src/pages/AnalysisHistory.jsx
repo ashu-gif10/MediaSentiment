@@ -319,15 +319,32 @@ const AnalysisHistory = ({ onOpenSidebar, onViewAnalysis, onNewAnalysis }) => {
                         }}
                       />
                       <span className="absolute bottom-1 right-1 bg-black/80 text-[10px] text-white px-1.5 py-0.5 rounded font-mono">
-                        {item.engine === 'youtube_api' ? 'API' : 'PY'}
+                        {item.engine === 'youtube_api' ? 'API' : (item.engine === 'csv_product_review' || item.engine === 'flipkart_review' ? 'CSV' : 'PY')}
                       </span>
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold text-brand-purple">
-                          {video.channelTitle || 'YouTube Creator'}
-                        </span>
+                        {item.engine === 'csv_product_review' || item.engine === 'flipkart_review' ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-semibold text-brand-purple">
+                              Product Reviews
+                            </span>
+                            {item.isDemo || item.metrics?.isDemo || item.product?.isDemo || item.product?.dataSource === 'sample_demo' ? (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-purple-300 font-medium">
+                                Demo Data
+                              </span>
+                            ) : (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-medium">
+                                Live CSV
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-[11px] font-semibold text-brand-purple">
+                            {video.channelTitle || 'YouTube Creator'}
+                          </span>
+                        )}
                         <span className="text-[11px] text-dark-muted">•</span>
                         <span className="text-[11px] text-dark-muted flex items-center gap-1">
                           <Clock className="w-3 h-3" />
@@ -358,9 +375,9 @@ const AnalysisHistory = ({ onOpenSidebar, onViewAnalysis, onNewAnalysis }) => {
                           </div>
                         )}
 
-                        {/* Comments count */}
+                        {/* Comments / Reviews count */}
                         <span className="text-[11px] text-dark-muted">
-                          {metrics.totalVaderAnalyzed || metrics.totalFetched || 0} comments
+                          {metrics.totalVaderAnalyzed || metrics.totalFetched || 0} {item.engine === 'csv_product_review' || item.engine === 'flipkart_review' ? 'reviews' : 'comments'}
                         </span>
 
                         {/* Sarcasm count */}

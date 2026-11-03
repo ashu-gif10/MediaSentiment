@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaSentiment - Flipkart Review Exporter</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      width: 380px;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #334155;
+      margin-bottom: 14px;
+    }
+    .logo-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+    }
+    .title-group h1 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+    .title-group p {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .status-badge.active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-badge.warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .product-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-top: 1px solid #334155;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .stat-val {
+      font-weight: 700;
+      color: #f8fafc;
+      font-size: 14px;
+    }
+    .btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+      margin-bottom: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #334155;
+      color: #e2e8f0;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #475569;
+    }
+    .btn-link {
+      background: transparent;
+      color: #a855f7;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      margin-bottom: 0;
+    }
+    .btn-link:hover {
+      background: rgba(168, 85, 247, 0.1);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .notice {
+      background: rgba(30, 41, 59, 0.6);
+      border-left: 3px solid #7c3aed;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: #94a3b8;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .msg-area {
+      font-size: 11px;
+      min-height: 18px;
+      text-align: center;
+      margin-bottom: 6px;
+      transition: all 0.2s;
+    }
+    .msg-area.success { color: #34d399; }
+    .msg-area.error { color: #f87171; }
+    .msg-area.info { color: #38bdf8; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 1px solid #334155;
+      font-size: 10px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-badge">M</div>
+    <div class="title-group">
+      <h1>MediaSentiment Exporter</h1>
+      <p>100% Free Flipkart Review Importer</p>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="card">
+      <div id="statusBadge" class="status-badge warning">Checking Tab...</div>
+      <div id="productName" class="product-title">Detecting page...</div>
+      <div class="stat-row">
+        <span>Reviews on current page:</span>
+        <span id="reviewCount" class="stat-val">0</span>
+      </div>
+    </div>
+
+    <div class="notice">
+      <strong>Transparent Note:</strong> Captures reviews currently loaded on your screen. To extract more, scroll or click next pages on Flipkart, then export again.
+    </div>
+
+    <div id="messageArea" class="msg-area"></div>
+
+    <button id="btnExpand" class="btn btn-secondary" disabled>
+      <span>📖</span>
+      <span>Expand "Read More" in Reviews</span>
+    </button>
+
+    <button id="btnExport" class="btn btn-primary" disabled>
+      <span>📥</span>
+      <span>Download Reviews CSV</span>
+    </button>
+
+    <button id="btnOpenApp" class="btn btn-link">
+      <span>🚀</span>
+      <span>Open MediaSentiment Analysis</span>
+    </button>
+  </div>
+
+  <div class="footer">
+    <span>RFC-4180 UTF-8 CSV</span>
+    <span>VADER + Gemini Pipeline</span>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+

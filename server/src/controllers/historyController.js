@@ -7,6 +7,13 @@ import Analysis from '../models/Analysis.js';
  */
 export const getHistory = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'MongoDB Atlas is currently disconnected. Please verify that your current IP address is whitelisted in MongoDB Atlas Network Access.',
+      });
+    }
+
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit, 10) || 20));
     const skip = (page - 1) * limit;
@@ -56,6 +63,13 @@ export const getHistory = async (req, res) => {
  */
 export const getHistoryById = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'MongoDB Atlas is currently disconnected. Please verify that your current IP address is whitelisted in MongoDB Atlas Network Access.',
+      });
+    }
+
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -93,6 +107,13 @@ export const getHistoryById = async (req, res) => {
  */
 export const deleteHistoryById = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        success: false,
+        message: 'MongoDB Atlas is currently disconnected. Please verify that your current IP address is whitelisted in MongoDB Atlas Network Access.',
+      });
+    }
+
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {

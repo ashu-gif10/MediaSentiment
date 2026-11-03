@@ -110,6 +110,14 @@ export const generatePdfReport = async (analysis) => {
     doc.roundedRect(margin, currentY, contentWidth, 24, 2, 2, 'F');
 
     // Brand Title
+    const isProductReview =
+      metrics.engine === 'csv_product_review' ||
+      metrics.engine === 'flipkart_review' ||
+      analysis.engine === 'csv_product_review' ||
+      analysis.engine === 'flipkart_review' ||
+      analysis.analysisType === 'product_review' ||
+      (video.channelTitle && (video.channelTitle.includes('Product') || video.channelTitle.includes('Flipkart')));
+
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.setTextColor(255, 255, 255);
@@ -118,7 +126,13 @@ export const generatePdfReport = async (analysis) => {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(199, 210, 254);
-    doc.text('AI YouTube Multi-Model Sentiment & Contextual Analysis Report', margin + 6, currentY + 16);
+    doc.text(
+      isProductReview
+        ? 'AI Product Review Multi-Model Sentiment & Contextual Analysis Report'
+        : 'AI YouTube Multi-Model Sentiment & Contextual Analysis Report',
+      margin + 6,
+      currentY + 16
+    );
 
     // Generation timestamp (right aligned)
     doc.setFontSize(8);
@@ -130,13 +144,16 @@ export const generatePdfReport = async (analysis) => {
       hour: '2-digit',
       minute: '2-digit',
     });
+    const engineLabel = isProductReview
+      ? 'CSV Review Dataset'
+      : (metrics.engine === 'youtube_api' ? 'YouTube API v3' : 'Python Downloader');
     doc.text(`Generated: ${dateFormatted}`, pageWidth - margin - 6, currentY + 9, { align: 'right' });
-    doc.text(`Engine: ${metrics.engine === 'youtube_api' ? 'YouTube API v3' : 'Python Downloader'}`, pageWidth - margin - 6, currentY + 16, { align: 'right' });
+    doc.text(`Engine: ${engineLabel}`, pageWidth - margin - 6, currentY + 16, { align: 'right' });
 
     currentY += 28;
 
     // ==========================================
-    // 2. VIDEO INFORMATION CARD
+    // 2. VIDEO / PRODUCT INFORMATION CARD
     // ==========================================
     doc.setFillColor(lightBg[0], lightBg[1], lightBg[2]);
     doc.setDrawColor(borderGray[0], borderGray[1], borderGray[2]);
@@ -145,17 +162,36 @@ export const generatePdfReport = async (analysis) => {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(brandDark[0], brandDark[1], brandDark[2]);
-    const rawTitle = cleanText(video.title) || `YouTube Video (${analysis.videoId || 'Unknown'})`;
+    const rawTitle = cleanText(video.title) || (isProductReview ? 'Product Reviews Analysis' : `YouTube Video (${analysis.videoId || 'Unknown'})`);
     const truncatedTitle = doc.splitTextToSize(rawTitle, contentWidth - 12);
     doc.text(truncatedTitle[0] || rawTitle, margin + 4, currentY + 6);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(textGray[0], textGray[1], textGray[2]);
-    const channelStr = cleanText(video.channelTitle) || 'YouTube Creator';
-    const videoUrl = analysis.url || `https://youtu.be/${video.id || analysis.videoId || ''}`;
-    doc.text(`Channel: ${channelStr}  |  Video URL: ${videoUrl}`, margin + 4, currentY + 12);
-    doc.text(`Views: ${fmt(video.views)}  |  Likes: ${fmt(video.likes)}  |  Total Available Comments: ${fmt(video.commentCount || metrics.totalAvailable)}`, margin + 4, currentY + 17);
+    const channelStr = cleanText(video.channelTitle) || (isProductReview ? 'CSV Upload' : 'YouTube Creator');
+    const videoUrl = analysis.url || (isProductReview ? (video.productUrl || 'CSV Dataset') : `https://youtu.be/${video.id || analysis.videoId || ''}`);
+
+    const isDemo = Boolean(
+      analysis.isDemo ||
+      analysis.product?.isDemo ||
+      analysis.product?.dataSource === 'sample_demo' ||
+      metrics.isDemo ||
+      metrics.dataSource === 'sample_demo' ||
+      video.channelTitle?.includes('Demo')
+    );
+    const sourceLabel = isDemo
+      ? 'Sample / Benchmark Dataset (Demo - Offline Test Data)'
+      : 'Live User-Imported Reviews (CSV)';
+
+    if (isProductReview) {
+      doc.text(`Data Source: ${sourceLabel}`, margin + 4, currentY + 11.5);
+      const ratingStr = metrics.averageRating ? `Avg Star Rating: ${metrics.averageRating} / 5.0` : 'Star Ratings: Not Provided';
+      doc.text(`Reference Link: ${videoUrl.length > 55 ? videoUrl.slice(0, 52) + '...' : videoUrl}  |  Reviews: ${fmt(metrics.totalAvailable || comments.length)}  |  ${ratingStr}`, margin + 4, currentY + 16.5);
+    } else {
+      doc.text(`Channel: ${channelStr}  |  Video URL: ${videoUrl}`, margin + 4, currentY + 12);
+      doc.text(`Views: ${fmt(video.views)}  |  Likes: ${fmt(video.likes)}  |  Total Available Comments: ${fmt(video.commentCount || metrics.totalAvailable)}`, margin + 4, currentY + 17);
+    }
 
     currentY += 27;
 
@@ -168,12 +204,19 @@ export const generatePdfReport = async (analysis) => {
     const totalGemini = metrics.totalGeminiAnalyzed || gemini.totalAnalyzed || 0;
     const agreeRate = typeof metrics.agreementRate === 'number' ? metrics.agreementRate : (comparison.agreementRate || 0);
 
+    const firstRowLabel = isProductReview
+      ? (isDemo ? 'Total Demo Reviews' : 'Total Live Reviews')
+      : 'Total Comments Fetched';
+    const firstRowDesc = isProductReview
+      ? (isDemo ? 'Offline benchmark dataset processed with dual VADER + Gemini AI' : 'Live customer reviews imported from CSV and processed with dual VADER + Gemini AI')
+      : 'Top-level comments and replies extracted from YouTube';
+
     autoTable(doc, {
       startY: currentY,
       margin: { left: margin, right: margin },
       head: [['Metric', 'Value', 'Description / Scope']],
       body: [
-        ['Total Comments Fetched', fmt(metrics.totalFetched || comments.length), 'Top-level comments and replies extracted from YouTube'],
+        [firstRowLabel, fmt(metrics.totalFetched || comments.length), firstRowDesc],
         ['VADER Lexical Analysis', `${fmt(totalVader)} comments`, 'Full rule-based sentiment classification across all fetched comments'],
         ['Gemini Contextual AI', `${fmt(totalGemini)} comments`, 'Deep context, emotion, and nuance analyzed in managed batches'],
         ['Model Agreement Rate', `${agreeRate}% (${fmt(comparison.agreementCount || 0)}/${fmt(comparison.totalCompared || totalGemini)})`, 'Alignment between VADER and Gemini (Agreement metric, not ground-truth accuracy)'],
@@ -526,7 +569,7 @@ export const generatePdfReport = async (analysis) => {
     }
 
     const filename = getReportFilename(video.title, analyzedDate);
-    
+
     // In browser, trigger client-side download
     if (typeof window !== 'undefined' && typeof doc.save === 'function') {
       doc.save(filename);

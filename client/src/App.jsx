@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import AnalysisHistory from './pages/AnalysisHistory';
+import ProductReviews from './pages/ProductReviews';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -11,7 +12,11 @@ function App() {
 
   const handleViewSavedAnalysis = (analysisData) => {
     setLoadedAnalysis(analysisData);
-    setActiveTab('dashboard');
+    if (analysisData?.engine === 'csv_product_review' || analysisData?.engine === 'flipkart_review' || analysisData?.analysisType === 'product_review') {
+      setActiveTab('product-reviews');
+    } else {
+      setActiveTab('dashboard');
+    }
   };
 
   const handleStartNewAnalysis = () => {
@@ -34,7 +39,15 @@ function App() {
         {(activeTab === 'dashboard' || activeTab === 'new-analysis' || activeTab === 'results') && (
           <Dashboard
             onOpenSidebar={() => setSidebarOpen(true)}
-            loadedAnalysis={loadedAnalysis}
+            loadedAnalysis={loadedAnalysis?.engine !== 'csv_product_review' && loadedAnalysis?.engine !== 'flipkart_review' ? loadedAnalysis : null}
+            onClearLoadedAnalysis={() => setLoadedAnalysis(null)}
+          />
+        )}
+
+        {activeTab === 'product-reviews' && (
+          <ProductReviews
+            onOpenSidebar={() => setSidebarOpen(true)}
+            loadedAnalysis={loadedAnalysis?.engine === 'csv_product_review' || loadedAnalysis?.engine === 'flipkart_review' ? loadedAnalysis : null}
             onClearLoadedAnalysis={() => setLoadedAnalysis(null)}
           />
         )}
@@ -47,28 +60,32 @@ function App() {
           />
         )}
 
-        {activeTab !== 'dashboard' && activeTab !== 'new-analysis' && activeTab !== 'results' && activeTab !== 'history' && (
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="text-center bg-dark-card border border-dark-border rounded-2xl p-8 max-w-md">
+        {activeTab !== 'dashboard' &&
+          activeTab !== 'new-analysis' &&
+          activeTab !== 'product-reviews' &&
+          activeTab !== 'results' &&
+          activeTab !== 'history' && (
+            <div className="flex-1 flex items-center justify-center p-8">
+              <div className="text-center bg-dark-card border border-dark-border rounded-2xl p-8 max-w-md">
 
-              <h3 className="text-lg font-bold text-white capitalize">
-                {activeTab} Page
-              </h3>
+                <h3 className="text-lg font-bold text-white capitalize">
+                  {activeTab} Page
+                </h3>
 
-              <p className="text-xs text-dark-muted mt-2">
-                This page will be connected in subsequent phases.
-              </p>
+                <p className="text-xs text-dark-muted mt-2">
+                  This page will be connected in subsequent phases.
+                </p>
 
-              <button
-                onClick={() => setActiveTab('dashboard')}
-                className="mt-4 px-4 py-2 bg-brand-purple hover:bg-purple-600 text-white rounded-xl text-xs font-semibold"
-              >
-                Return to Dashboard
-              </button>
+                <button
+                  onClick={() => setActiveTab('dashboard')}
+                  className="mt-4 px-4 py-2 bg-brand-purple hover:bg-purple-600 text-white rounded-xl text-xs font-semibold"
+                >
+                  Return to Dashboard
+                </button>
 
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
       </div>
     </div>

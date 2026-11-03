@@ -59,6 +59,66 @@ export const analyzeYouTubeComments = async (url, maxAnalyze = 100, options = {}
 };
 
 /**
+ * Send parsed reviews or CSV data to backend for VADER + Gemini sentiment analysis
+ * Endpoint: POST /api/analyze/reviews
+ *
+ * @param {Object} payload - Analysis payload
+ * @param {Array} [payload.reviews] - Array of parsed review objects
+ * @param {string} [payload.csvText] - Raw CSV text
+ * @param {Object} [payload.metadata] - Optional product metadata (productName, productUrl)
+ * @param {number} [payload.maxAnalyze] - Max reviews to analyze with Gemini AI
+ */
+export const analyzeProductReviews = async (payload) => {
+  try {
+    const response = await api.post('/analyze/reviews', payload);
+    return { success: true, data: response.data };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Failed to analyze product reviews',
+    };
+  }
+};
+
+/**
+ * Validate Flipkart Product URL and retrieve product metadata
+ * Endpoint: POST /api/analyze/flipkart/validate
+ *
+ * @param {string} url - Flipkart product URL
+ */
+export const validateFlipkartUrlApi = async (url) => {
+  try {
+    const response = await api.post('/analyze/flipkart/validate', { url });
+    return { success: true, data: response.data };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Failed to validate Flipkart URL',
+    };
+  }
+};
+
+/**
+ * Fetch live customer reviews from Flipkart using flipkart-scraping backend (Scrape.do)
+ * Endpoint: POST /api/analyze/flipkart/fetch-reviews
+ *
+ * @param {string} url - Flipkart product URL
+ * @param {number} [maxItems=50] - Maximum reviews to fetch
+ */
+export const fetchFlipkartReviewsApi = async (url, maxItems = 50) => {
+  try {
+    const response = await api.post('/analyze/flipkart/fetch-reviews', { url, maxItems });
+    return { success: true, data: response.data };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Failed to fetch reviews from Flipkart',
+      data: error.response?.data,
+    };
+  }
+};
+
+/**
  * Fetch saved analysis history from MongoDB Atlas
  * Endpoint: GET /api/history
  */
